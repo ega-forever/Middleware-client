@@ -1,0 +1,20 @@
+{
+  "name": "middleware-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "node ./node_modules/eslint/bin/eslint.js --ext .js --fix api index.js",
+    "test": "jest tests --runInBand"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "request": "^2.81.0",
+    "query-to-mongo-and-back": "git+https://github.com/ega-forever/query-to-mongo-and-back.git#develop"
+  },
+  "devDependencies": {
+    "eslint": "^4.1.1",
+    "jest": "^20.0.4"
+  }
+}

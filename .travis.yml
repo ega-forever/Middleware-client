@@ -1,0 +1,40 @@
+sudo: required
+dist: trusty
+os: linux
+group: stable
+language: node_js
+node_js: 7.9.0
+
+services: mongodb
+
+
+before_install:
+  - mongo data --eval 'db.dropDatabase();'
+  - sudo apt-get update
+  - sudo apt-get install wget python2.7 git-all pkg-config libncurses5-dev libssl-dev libnss3-dev libexpat-dev libc6-dev git -y
+  - wget https://dist.ipfs.io/go-ipfs/v0.4.9/go-ipfs_v0.4.9_linux-amd64.tar.gz -O ipfs.tar.gz
+  - tar xvfz ipfs.tar.gz
+  - sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
+  - ipfs init
+  - git clone https://github.com/ega-forever/Middleware.git -b develop
+  - cd Middleware && npm install
+
+install:
+  - npm install
+
+script:
+  - npm run testrpc > /dev/null &
+  - sleep 5 && npm run bridge > /dev/null &
+  - sleep 60 && npm run contracts
+  - npm test -- --coverage
+
+after_script:
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+
+notifications:
+  slack: chrono-dev:a6jsr4kW5U4uxrGNOxygOWGF
+  email: false
+
+cache:
+  directories:
+    - node_modules
