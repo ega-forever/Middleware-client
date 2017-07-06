@@ -18,17 +18,17 @@ before_install:
   - ipfs init
   - git clone https://github.com/ega-forever/Middleware.git -b develop
   - cd Middleware && npm install
+  - npm run testrpc > /dev/null &
+  - sleep 5 && npm run bridge > /dev/null &
+  - sleep 20 && npm run contracts
+  - sleep 30 && npm run test
 
 
 install:
   - npm install
 
 script:
-  - cd Middleware && npm run testrpc > /dev/null &
-  - sleep 5 && npm run bridge > /dev/null &
-  - sleep 60 && npm run contracts
-  - sleep 30 && npm run test
-  - cd .. && npm run test -- --coverage
+  - npm run test -- --coverage
 
 notifications:
   email: false
