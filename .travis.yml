@@ -3,7 +3,7 @@ dist: trusty
 os: linux
 group: stable
 language: node_js
-node_js: 7.9.0
+node_js: 6.10.3
 
 services: mongodb
 
