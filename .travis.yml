@@ -17,11 +17,11 @@ before_install:
   - sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
   - ipfs init
   - git clone https://github.com/ega-forever/Middleware.git -b develop
-  - cd Middleware && npm install
-  - npm run testrpc > /dev/null &
-  - sleep 5 && npm run bridge > /dev/null &
-  - sleep 20 && npm run contracts
-  - sleep 30 && npm run test
+  - npm install --prefix Middleware
+  - npm run testrpc --prefix Middleware  > /dev/null &
+  - sleep 5 && npm run bridge --prefix Middleware > /dev/null &
+  - sleep 20 && npm run contracts --prefix Middleware
+  - sleep 30 && npm run test --prefix Middleware
 
 
 install:
