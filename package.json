@@ -14,7 +14,11 @@
     "query-to-mongo-and-back": "git+https://github.com/ega-forever/query-to-mongo-and-back.git#develop"
   },
   "devDependencies": {
+    "chronobank-smart-contracts": "git+https://github.com/ChronoBank/SmartContracts.git#develop",
     "eslint": "^4.1.1",
-    "jest": "^20.0.4"
+    "jest": "^20.0.4",
+    "lodash": "^4.17.4",
+    "require-all": "^2.2.0",
+    "web3": "^0.19.0"
   }
 }

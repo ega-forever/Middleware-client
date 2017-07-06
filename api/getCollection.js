@@ -3,7 +3,13 @@ const request = require('request'),
 
 module.exports =(host, namespace, collection, query, opts)=>{
 
-  return new Promise((res)=>
-    request(`${host}${namespace ? '/' + namespace : ''}/${collection}?${q2mb.toQuery(query, opts)}`, (err, response, body)=> res(JSON.parse(body)))
-  );
+  return new Promise((resolve, reject)=>
+    request(`${host}${namespace ? '/' + namespace : ''}/${collection}?${q2mb.toQuery(query, opts)}`, (err, response, body)=>{
+      try {
+        resolve(JSON.parse(body));
+      }catch (e){
+        reject(`wrong event's name passed: ${collection}`);
+      }
+    })
+  ).catch(err=>{console.log(err)});
 };

@@ -19,20 +19,18 @@ before_install:
   - git clone https://github.com/ega-forever/Middleware.git -b develop
   - cd Middleware && npm install
 
+
 install:
   - npm install
 
 script:
-  - npm run testrpc > /dev/null &
-  - sleep 5 && npm run bridge > /dev/null &
-  - sleep 60 && npm run contracts
-  - npm test -- --coverage
-
-after_script:
-  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  - cd Middleware && npm run testrpc > /dev/null &
+  - sleep 5 && cd Middleware && npm run bridge > /dev/null &
+  - sleep 60 && cd Midlleware && npm run contracts
+  - sleep 30 && cd Midlleware && npm run test
+  - npm run test -- --coverage
 
 notifications:
-  slack: chrono-dev:a6jsr4kW5U4uxrGNOxygOWGF
   email: false
 
 cache:
