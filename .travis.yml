@@ -18,9 +18,8 @@ before_install:
   - ipfs init
   - git clone https://github.com/ega-forever/Middleware.git -b develop
   - npm install --prefix Middleware
+  - npm run prepare_linux_install --prefix Middleware
   - npm run testrpc --prefix Middleware  > /dev/null &
-  - sleep 5 && npm run bridge --prefix Middleware > /dev/null &
-  - sleep 20 && npm run contracts --prefix Middleware
   - sleep 30 && npm run test --prefix Middleware
 
 
