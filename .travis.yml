@@ -16,6 +16,7 @@ before_install:
   - tar xvfz ipfs.tar.gz
   - sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
   - ipfs init
+  - ipfs daemon > /dev/null &
   - git clone https://github.com/ega-forever/Middleware.git -b develop
   - npm install --prefix Middleware
   - npm run testrpc --prefix Middleware  > /dev/null &
