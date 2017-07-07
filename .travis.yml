@@ -24,7 +24,7 @@ install:
   - npm install
   - npm run testrpc --prefix Middleware  > /dev/null &
   - npm run prepare_linux_install --prefix Middleware
-  - cp Middleware/node_modules/chronobank-smart-contracts/build node_modules/chronobank-smart-contracts
+  - cp -avr Middleware/node_modules/chronobank-smart-contracts/build/ node_modules/chronobank-smart-contracts
   - node Middleware > /dev/null &
   - sleep 30 && npm run test --prefix Middleware
 
