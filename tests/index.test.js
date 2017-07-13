@@ -2,6 +2,7 @@ const Promise = require('bluebird'),
   Web3 = require('web3'),
   _ = require('lodash'),
   path = require('path'),
+  mongoose = require('mongoose'),
   require_all = require('require-all'),
   eventTransformer = require('./helpers/eventTransformer'),
   bytes32 = require('./helpers/bytes32'),
@@ -31,12 +32,14 @@ beforeAll(() => {
   })
     .then(accounts => {
       ctx.accounts = accounts;
+      return mongoose.connect('mongodb://localhost:32772/data'); //todo set
     })
 
 });
 
 afterAll(() => {
   ctx.web3.currentProvider.connection.end();
+  return mongoose.disconnect();
 });
 
 test('get all events', () => {
@@ -103,3 +106,31 @@ test('get all transactions', () => {
     })
 });
 
+test('fetch accounts from db', () =>
+  mongoose.model('Account', {
+    address: String
+  }).find({})
+    .then(accounts => {
+
+      expect(accounts).toBeDefined();
+      accounts = _.map(accounts, a=>a.address);
+
+      ctx.accounts = _.chain(ctx.accounts)
+        .reject(a =>
+          accounts.includes(a)
+        )
+        .value();
+
+      return Promise.resolve();
+    })
+);
+
+
+
+test('add new account', () =>
+  ctx.middleware.addAccount(_.head(ctx.accounts))
+    .then(result=>{
+      expect(result).toBeDefined();
+      expect(result.success).toEqual(true);
+    })
+);
