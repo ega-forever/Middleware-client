@@ -14,7 +14,7 @@ const Promise = require('bluebird'),
     accounts: []
   };
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
 
 beforeAll(() => {
   ctx.provider = new Web3.providers.HttpProvider('http://localhost:8545');
@@ -32,7 +32,7 @@ beforeAll(() => {
   })
     .then(accounts => {
       ctx.accounts = accounts;
-      return mongoose.createConnection('mongodb://localhost:27017/data');
+      return mongoose.connect('mongodb://localhost:27017/data');
     })
 
 });
@@ -43,24 +43,24 @@ afterAll(() => {
 
 /*test('get all events', () => {
 
-  return Promise.all(
-    _.map(ctx.events, (ev, name) =>
-      ctx.middleware.getEvent(name)
-        .then(data => ({data, definition: ev}))
-    )
-  ).then(data => {
-    _.chain(data)
-      .forEach(ev => {
-        if (!_.isEmpty(ev.data))
-          ev.data.forEach(record => {
-            _.forEach(ev.definition, (def, field) => {
-              expect(typeof record[field]).toEqual(def.type);
-            })
-          })
-      })
-      .value()
-  })
-});*/
+ return Promise.all(
+ _.map(ctx.events, (ev, name) =>
+ ctx.middleware.getEvent(name)
+ .then(data => ({data, definition: ev}))
+ )
+ ).then(data => {
+ _.chain(data)
+ .forEach(ev => {
+ if (!_.isEmpty(ev.data))
+ ev.data.forEach(record => {
+ _.forEach(ev.definition, (def, field) => {
+ expect(typeof record[field]).toEqual(def.type);
+ })
+ })
+ })
+ .value()
+ })
+ });*/
 
 test('create tx', () =>
   new Promise(res => {
@@ -106,13 +106,15 @@ test('get all transactions', () => {
 });
 
 test('fetch accounts from db', () =>
-  mongoose.model('Account', {
-    address: String
-  }).find({})
+  mongoose.model('Account',
+    new mongoose.Schema({
+      address: {type: String}
+    })
+  ).find({})
     .then(accounts => {
-
+      console.log(accounts);
       expect(accounts).toBeDefined();
-      accounts = _.map(accounts, a=>a.address);
+      accounts = _.map(accounts, a => a.address);
 
       ctx.accounts = _.chain(ctx.accounts)
         .reject(a =>
@@ -122,13 +124,12 @@ test('fetch accounts from db', () =>
 
       return Promise.resolve();
     })
+    .catch(err => console.log(err))
 );
-
-
 
 test('add new account', () =>
   ctx.middleware.addAccount(_.head(ctx.accounts))
-    .then(result=>{
+    .then(result => {
       expect(result).toBeDefined();
       expect(result.success).toEqual(true);
     })
