@@ -32,7 +32,7 @@ beforeAll(() => {
   })
     .then(accounts => {
       ctx.accounts = accounts;
-      return mongoose.createConnection('mongodb://localhost:32772/data');
+      return mongoose.createConnection('mongodb://localhost:27017/data');
     })
 
 });
