@@ -21,8 +21,8 @@ before_install:
 install:
   - npm install
   - node ./node_modules/middleware/ipcConverter.js | node ./node_modules/ethereumjs-testrpc/bin/testrpc > /dev/null &
-  - cd ~/node_modules/chronobank-smart-contracts && node ../truffle/build/cli.bundled migrate
-  - node node_modules/middleware > /dev/null &
+  - cd node_modules/chronobank-smart-contracts && node ../truffle/build/cli.bundled migrate
+  - cd ../../ && node node_modules/middleware > /dev/null &
   - sleep 30 && npm run test
 
 script:
