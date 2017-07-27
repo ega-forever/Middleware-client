@@ -20,8 +20,8 @@ before_install:
 
 install:
   - npm install
-  - npm run testrpc --prefix Middleware  > /dev/null &
-  - cd ./node_modules/middleware && npm run prepare_linux_install
+  - cd node_modules/middleware && npm run testrpc > /dev/null &
+  - npm run prepare_linux_install
   - node . > /dev/null &
   - sleep 30 && npm run test
 
