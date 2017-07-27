@@ -23,7 +23,7 @@ install:
   - node ./node_modules/middleware/ipcConverter.js | node ./node_modules/ethereumjs-testrpc/bin/testrpc > /dev/null &
   - cd node_modules/chronobank-smart-contracts && node ../truffle/build/cli.bundled migrate
   - cd $TRAVIS_BUILD_DIR && node node_modules/middleware > /dev/null &
-  - sleep 30 && npm run test
+  - sleep 30 && cd $TRAVIS_BUILD_DIR && npm run test
 
 script:
   - npm run test -- --coverage
