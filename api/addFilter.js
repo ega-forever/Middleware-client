@@ -1,13 +1,15 @@
 const request = require('request');
 
-module.exports =(host, address)=>{
+module.exports =(host, callback, event, filter)=>{
 
   return new Promise((resolve, reject)=>
     request({
-      url: `${host}/account`,
+      url: `${host}/events/listener`,
       method: 'POST',
       json: {
-        address: address
+        callback: callback,
+        event: event,
+        filter: filter
       }
     }, (err, resp) => {
       err || resp.statusCode !== 200 ? reject(err) : resolve(resp.body)

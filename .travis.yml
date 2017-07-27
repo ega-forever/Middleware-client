@@ -17,16 +17,13 @@ before_install:
   - sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
   - ipfs init
   - ipfs daemon > /dev/null &
-  - git clone https://github.com/ega-forever/Middleware.git -b develop
 
 install:
-  - npm install --prefix Middleware
   - npm install
   - npm run testrpc --prefix Middleware  > /dev/null &
-  - npm run prepare_linux_install --prefix Middleware
-  - cp -avr Middleware/node_modules/chronobank-smart-contracts/build/ node_modules/chronobank-smart-contracts
-  - node Middleware > /dev/null &
-  - sleep 30 && npm run test --prefix Middleware
+  - cd ./node_modules/middleware && npm run prepare_linux_install
+  - node . > /dev/null &
+  - sleep 30 && npm run test
 
 script:
   - npm run test -- --coverage

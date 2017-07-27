@@ -1,8 +1,13 @@
 const Promise = require('bluebird'),
+  config = require('middleware/config'),
   Web3 = require('web3'),
   _ = require('lodash'),
   path = require('path'),
   mongoose = require('mongoose'),
+  contract = require('truffle-contract'),
+  http = require('http'),
+  express = require('express'),
+  bodyParser = require('body-parser'),
   require_all = require('require-all'),
   eventTransformer = require('./helpers/eventTransformer'),
   bytes32 = require('./helpers/bytes32'),
@@ -11,10 +16,13 @@ const Promise = require('bluebird'),
   ctx = {
     web3: null,
     factory: {},
-    accounts: []
+    accounts: [],
+    express: {
+      app: express()
+    }
   };
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 90000;
 
 beforeAll(() => {
   ctx.provider = new Web3.providers.HttpProvider('http://localhost:8545');
@@ -22,115 +30,89 @@ beforeAll(() => {
   ctx.web3.setProvider(ctx.provider);
   ctx.contracts = require_all({ //scan dir for all smartContracts, excluding emitters (except ChronoBankPlatformEmitter) and interfaces
     dirname: path.join(__dirname, '../node_modules', 'chronobank-smart-contracts/build/contracts'),
-    filter: /(^((ChronoBankPlatformEmitter)|(?!(Emitter|Interface)).)*)\.json$/
+    filter: /(^((ChronoBankPlatformEmitter)|(?!(Emitter|Interface)).)*)\.json$/,
+    resolve: Contract => {
+      let c = contract(Contract);
+      c.defaults({gas: 3000000});
+      c.setProvider(ctx.provider);
+      return c;
+    }
   });
   ctx.middleware = new middleware('http://localhost:8081');
   ctx.events = eventTransformer(ctx.provider);
+  ctx.express.server = http.createServer(ctx.express.app);
+  ctx.express.app.use(bodyParser.urlencoded({extended: false}));
+  ctx.express.app.use(bodyParser.json());
 
   return new Promise(res => {
     ctx.web3.eth.getAccounts((err, result) => res(result));
   })
     .then(accounts => {
       ctx.accounts = accounts;
-      return mongoose.connect('mongodb://localhost:27017/data');
+      return Promise.all([
+        new Promise(res =>
+          ctx.express.server.listen(config.rest.port + 1, res)
+        ),
+        mongoose.connect(config.mongo.uri)
+      ])
     })
 
 });
 
 afterAll(() => {
+  ctx.express.server.close();
   mongoose.disconnect();
 });
 
-/*test('get all events', () => {
+test('get all events', () => {
 
- return Promise.all(
- _.map(ctx.events, (ev, name) =>
- ctx.middleware.getEvent(name)
- .then(data => ({data, definition: ev}))
- )
- ).then(data => {
- _.chain(data)
- .forEach(ev => {
- if (!_.isEmpty(ev.data))
- ev.data.forEach(record => {
- _.forEach(ev.definition, (def, field) => {
- expect(typeof record[field]).toEqual(def.type);
- })
- })
- })
- .value()
- })
- });*/
-
-test('create tx', () =>
-  new Promise(res => {
-    ctx.web3.eth.sendTransaction({
-      from: ctx.accounts[0],
-      to: ctx.accounts[1],
-      value: ctx.web3.toWei(0.05, 'ether')
-    }, (err, address) => {
-      res(address);
-    });
-  })
-    .then(result => {
-      expect(result).toBeDefined();
-      return Promise.resolve();
-    })
-);
-
-test('get all transactions', () => {
-
-  let schema = {
-    blockHash: {type: 'string'},
-    blockNumber: {type: 'string'},
-    from: {type: 'string'},
-    gasUsed: {type: 'string'},
-    to: {type: 'string'},
-    transactionHash: {type: 'string'},
-    value: {type: 'string'}
-
-  };
-
-  ctx.middleware.getTransactions()
-    .then(data => {
-
-      _.chain(data)
-        .forEach(tx => {
-          _.forEach(schema, (def, field) => {
-            expect(typeof tx[field]).toEqual(def.type);
+  return Promise.all(
+    _.map(ctx.events, (ev, name) =>
+      ctx.middleware.getEvent(name)
+        .then(data => ({data, definition: ev}))
+    )
+  ).then(data => {
+    _.chain(data)
+      .forEach(ev => {
+        if (!_.isEmpty(ev.data))
+          ev.data.forEach(record => {
+            _.forEach(ev.definition, (def, field) => {
+              expect(typeof record[field]).toEqual(def.type);
+            })
           })
-        })
-        .value()
-
-    })
+      })
+      .value()
+  })
 });
 
-test('fetch accounts from db', () =>
-  mongoose.model('Account',
-    new mongoose.Schema({
-      address: {type: String}
-    })
-  ).find({})
-    .then(accounts => {
-      console.log(accounts);
-      expect(accounts).toBeDefined();
-      accounts = _.map(accounts, a => a.address);
-
-      ctx.accounts = _.chain(ctx.accounts)
-        .reject(a =>
-          accounts.includes(a)
-        )
-        .value();
-
-      return Promise.resolve();
-    })
-    .catch(err => console.log(err))
+test('add new filter', () =>
+  ctx.middleware.addFilter(
+    `http://localhost:${config.rest.port + 1}/test`,
+    'transfer',
+    {
+      to: ctx.accounts[1],
+      symbol: bytes32('TIME')
+    }
+  )
 );
 
-test('add new account', () =>
-  ctx.middleware.addAccount(_.head(ctx.accounts))
-    .then(result => {
-      expect(result).toBeDefined();
-      expect(result.success).toEqual(true);
+test('transfer a token and validate', () =>
+  Promise.all([
+    ctx.contracts.AssetsManager.deployed()
+      .then(instance =>
+        instance.sendAsset(
+          bytes32('TIME'), ctx.accounts[1], 100, {
+            from: ctx.accounts[0],
+            gas: 3000000
+          })
+      ),
+    new Promise(resolve => {
+      ctx.express.app.post('/test', (req, res) => {
+        expect(req.body.to).toEqual(ctx.accounts[1]);
+        expect(req.body.symbol).toEqual(bytes32('TIME'));
+        resolve();
+        res.send();
+      });
     })
+  ]).catch(err => console.log(err))
 );

@@ -1,5 +1,5 @@
 const getCollection = require('./api/getCollection'),
-  addAccount = require('./api/addAccount');
+  addFilter = require('./api/addFilter');
 
 module.exports = class MiddlewareClient{
 
@@ -7,7 +7,7 @@ module.exports = class MiddlewareClient{
     this.host = host;
     this.getEvent = getCollection.bind(null, this.host, 'events');
     this.getTransactions = getCollection.bind(null, this.host, null, 'transactions');
-    this.addAccount = addAccount.bind(null, this.host);
+    this.addFilter = addFilter.bind(null, this.host);
   }
 
 };
