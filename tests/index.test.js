@@ -38,7 +38,7 @@ beforeAll(() => {
       return c;
     }
   });
-  ctx.middleware = new middleware('http://localhost:8081');
+  ctx.middleware = new middleware(`http://${config.rest.domain}:${config.rest.port}`);
   ctx.events = eventTransformer(ctx.provider);
   ctx.express.server = http.createServer(ctx.express.app);
   ctx.express.app.use(bodyParser.urlencoded({extended: false}));
