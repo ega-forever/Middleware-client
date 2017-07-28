@@ -27,8 +27,7 @@ install:
   - cp -ax $TRAVIS_BUILD_DIR/node_modules/web3 $TRAVIS_BUILD_DIR/node_modules/chronobank-smart-contracts/node_modules
   - cd node_modules/chronobank-smart-contracts && node ../truffle/build/cli.bundled migrate
   - cd $TRAVIS_BUILD_DIR && node node_modules/middleware > /dev/null &
-  - cd $TRAVIS_BUILD_DIR/node_modules/middleware && npm run test
-  - sleep 30 && cd $TRAVIS_BUILD_DIR && node ../jest/bin/jest.js test --coverage --runInBand
+  - cd $TRAVIS_BUILD_DIR/node_modules/middleware && node ../jest/bin/jest.js test --coverage --runInBand
 
 script:
   - npm run test -- --coverage
