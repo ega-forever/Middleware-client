@@ -37,6 +37,22 @@ Return all records from the speicified event's collection
 | opts | options (limit, offset, sort) (optional)
 
 
+##### new middleware(<address>).addFilter(callback, event, filter);
+Add new listener for events with specified filter
+
+| param | description|
+| ------ | ------ |
+| callback | the callback url, which will be triggered on update
+| event | name of the event, which we are going to listen to
+| filter | the filter criteria
+
+
+##### new middleware(<address>).removeFilter(hash);
+Remove listener by calculated hash (check utils.convertFilterToHash)
+
+##### new middleware(<address>).utils.convertFilterToHash(callback, event, filter);
+calculate hash by filter props. This hash is a unique identifier for each event, which makes filters unique and avoid duplicates.
+
 ### Testing
 As this is the client side module - the intergration tests are take the first place.
 It means, that for testing, you already should have a middleware running in a background.

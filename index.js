@@ -3,6 +3,12 @@ const getCollection = require('./api/getCollection'),
   removeFilter = require('./api/removeFilter'),
   convertFilterToHash = require('./api/utils/convertFilterToHash');
 
+/**
+ * @class MiddlewareClient
+ * @description middleware client
+ * @param host - host, on which middleware listen to connections
+ */
+
 module.exports = class MiddlewareClient {
 
   constructor(host) {
@@ -13,7 +19,7 @@ module.exports = class MiddlewareClient {
     this.removeFilter = removeFilter.bind(null, this.host);
     this.utils = {
       convertFilterToHash: convertFilterToHash
-    }
+    };
   }
 
 };

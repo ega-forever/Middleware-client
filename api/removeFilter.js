@@ -1,4 +1,13 @@
-const request = require('request');
+const request = require('request'),
+  log = require('loglevel');
+
+/**
+ * @function removeFilter
+ * @description removes exciting filter
+ * @param host - address of middleware
+ * @param hash - the calculated hash of listener
+ * @returns {Promise|Promise.<T>}
+ */
 
 module.exports =(host, hash)=>{
 
@@ -10,7 +19,8 @@ module.exports =(host, hash)=>{
         id: hash
       }
     }, (err, resp) => {
-      err || resp.statusCode !== 200 ? reject(err) : resolve(resp.body)
+      err || resp.statusCode !== 200 ? reject(err) : resolve(resp.body);
     })
-  ).catch(err=>{console.log(err)});
+  )
+    .catch(err => log.error(err));
 };

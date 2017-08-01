@@ -10,8 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "request": "^2.81.0",
-    "query-to-mongo-and-back": "git+https://github.com/ega-forever/query-to-mongo-and-back.git#develop"
+    "loglevel": "^1.4.1",
+    "query-to-mongo-and-back": "git+https://github.com/ega-forever/query-to-mongo-and-back.git#develop",
+    "request": "^2.81.0"
   },
   "devDependencies": {
     "body-parser": "^1.17.2",
