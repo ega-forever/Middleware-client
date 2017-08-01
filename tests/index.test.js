@@ -53,8 +53,7 @@ beforeAll(() => {
         new Promise(res =>
           ctx.express.server.listen(config.rest.port + 1, res)
         ),
-        //mongoose.connect(config.mongo.uri)
-        mongoose.connect('mongodb://localhost:32772/data')
+        mongoose.connect(config.mongo.uri)
       ])
     })
 
