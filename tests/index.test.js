@@ -53,7 +53,8 @@ beforeAll(() => {
         new Promise(res =>
           ctx.express.server.listen(config.rest.port + 1, res)
         ),
-        mongoose.connect(config.mongo.uri)
+        //mongoose.connect(config.mongo.uri)
+        mongoose.connect('mongodb://localhost:32772/data')
       ])
     })
 
@@ -85,15 +86,33 @@ test('get all events', () => {
   })
 });
 
-test('add new filter', () =>
-  ctx.middleware.addFilter(
-    `http://localhost:${config.rest.port + 1}/test`,
-    'transfer',
-    {
-      to: ctx.accounts[1],
-      symbol: bytes32('TIME')
-    }
-  )
+test('add new filter and TIME Asset', () =>
+
+  Promise.all([
+    ctx.contracts.AssetsManager.deployed(),
+    ctx.contracts.ChronoBankAssetProxy.deployed(),
+    ctx.middleware.addFilter(
+      `http://localhost:${config.rest.port + 1}/test`,
+      'transfer',
+      {
+        to: ctx.accounts[1],
+        symbol: bytes32('TIME')
+      }
+    )
+  ])
+    .spread((AssetsManager, ChronoBankAssetProxy, filterResult) => {
+        expect(filterResult.success).toEqual(true);
+        return AssetsManager.addAsset(
+          ChronoBankAssetProxy.address, 'TIME', ctx.accounts[0], {
+            from: ctx.accounts[0],
+            gas: 3000000
+          })
+      }
+    )
+    .then((result) => {
+      expect(result).toBeDefined();
+      expect(result.tx).toBeDefined();
+    })
 );
 
 test('transfer a token and validate', () =>
@@ -115,4 +134,20 @@ test('transfer a token and validate', () =>
       });
     })
   ]).catch(err => console.log(err))
+);
+
+test('remove filter', () =>
+  ctx.middleware.removeFilter(
+    ctx.middleware.utils.convertFilterToHash(
+      `http://localhost:${config.rest.port + 1}/test`,
+      'transfer',
+      {
+        to: ctx.accounts[1],
+        symbol: bytes32('TIME')
+      }
+    )
+  )
+    .then(result => {
+      expect(result.success).toEqual(true);
+    })
 );
